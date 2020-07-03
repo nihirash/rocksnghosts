@@ -1,0 +1,5 @@
+rng.bin
+*.tap
+*.wav
+*.zx7
+levels/levels.asm
