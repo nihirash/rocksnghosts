@@ -10,6 +10,8 @@ Compilation made by GNU Make(I've developed game under macOS but it nothing chan
 
 If you'll need help with this process - create issue and I'll make help you/prepare bat-file.
 
+As graphics and level design was used CharPad(yes, commodore tool). Just load as charset chars.raw and make yourown map sized(32x23) - put it in levels/raw directory, add filename of raw file to main.asm in `leveltable` block and your level in game(also you may change MAX_LEVELS constant).
+
 ## License
 
 I've licensed project by [Nihirash's Coffeeware License](LICENSE). 
