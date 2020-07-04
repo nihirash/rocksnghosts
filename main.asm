@@ -1,4 +1,7 @@
-SINCLAIR1 = #EFFE
+
+Q_ROW = 64510
+A_ROW = 65022
+OP_ROW = 57342
 
 SCREEN = #2000
 SCREEN_END = SCREEN + 768
@@ -23,14 +26,22 @@ ENEMY_DEAD = 16
 
 MAX_LEVELS = 12
 
+    include "tapeutils.asm"
+
+
     DEVICE ZXSPECTRUM48
-    org #4000
-start:
-    ld sp, start - 1
+    MakeAceTap "rng", dataBlock.link
+dataBlock:
+.name db "RN", 'G' + #80
+.size dw (dataBlockEnd - $)
+      dw DICT_BEGIN
+.link db .size - .name
+      dw $ + 2 
+gameStart:
+    ld sp, gameStart - 1
     call cls
     ; Load font
     ld de, CHARS, hl, sprites, bc, 1016 : ldir 
-    ;ld de, CHARS + 1015, hl, sprites : call dzx7
     ; Start screen
     ld de, SCREEN_END - 1, hl, title : call dzx7
 .intoWait
@@ -68,7 +79,7 @@ gamefinished:
     in a, (c)
     rrca 
     jr c, .loop
-    jp start
+    jp gameStart
 nextLevel:
     ld a, (cur_level)
     inc a
@@ -116,12 +127,10 @@ bangAnim:
     jr .exitLoop
 
 controls:
-    ld bc, SINCLAIR1 : in a, (c) : and 31
-
-    push af: bit 4, a  : call z, p_left : pop af
-    push af : bit 3, a : call z, p_right : pop af
-    push af : bit 2, a : call z, p_down : pop af
-    push af : bit 1, a : call z, p_up : pop af
+    ld bc, Q_ROW : in a, (c) : and 1 : call z, p_up
+    ld bc, A_ROW : in a, (c) : and 1 : call z, p_down
+    ld bc, OP_ROW : in a, (c) : and 1 : call z, p_right
+    ld bc, OP_ROW : in a, (c) : and 2 : call z, p_left
     ret
 
 moveEnemies:
@@ -606,7 +615,11 @@ leveltable
     dw level12
 
     include "levels/levels.asm"
-    DISPLAY "SIZE: ",  $ - start
+dataBlockEnd:
+    CHECKSUM dataBlock
+
+tapEnd
+
     display "Last addr: ", $
 
-    SAVEBIN "rng.bin", start, $ - start
+    SAVEBIN "rng.tap", tapBegin, tapEnd - tapBegin
